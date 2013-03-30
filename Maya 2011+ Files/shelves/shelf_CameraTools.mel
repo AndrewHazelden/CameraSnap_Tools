@@ -1,0 +1,137 @@
+global proc shelf_CameraTools () {
+    global string $gBuffStr;
+    global string $gBuffStr0;
+    global string $gBuffStr1;
+
+
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 39
+        -height 39
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "CameraSnap" 
+        -enableBackground 0
+        -align "center" 
+        -label "CameraSnap" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.2 
+        -image "CameraSnap.png" 
+        -image1 "CameraSnap.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "print(\"Camera Snap Tool\");\nsource \"CameraSnap.mel\";\nCameraSnap(1);\n" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Show" 
+        -enableBackground 0
+        -align "center" 
+        -label "Show" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -imageOverlayLabel "Show" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.2 
+        -image "commandButton.png" 
+        -image1 "commandButton.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "print(\"Show Selection\");\nShowSelectedObjects;\n" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Hide Selection" 
+        -enableBackground 0
+        -align "center" 
+        -label "Hide" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -imageOverlayLabel "Hide" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.2 
+        -image "commandButton.png" 
+        -image1 "commandButton.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "print(\"Hide Selection\");\nHideSelectedObjects;" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Look Through Selected" 
+        -enableBackground 0
+        -align "center" 
+        -label "LookSelected" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -imageOverlayLabel "Look" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.2 
+        -image "commandButton.png" 
+        -image1 "commandButton.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "print(\"Look Through the Selected Object\");\nlookThroughSelected 0 modelPanel4;" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "View Perspective Camera" 
+        -enableBackground 0
+        -align "center" 
+        -label "PerspView" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -imageOverlayLabel "Persp" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.2 
+        -image "commandButton.png" 
+        -image1 "commandButton.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "print(\"Look Through the Perspective View\");\n//lookThroughSelected \"persp\" modelPanel4;\nlookThru persp;\n" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+
+} 

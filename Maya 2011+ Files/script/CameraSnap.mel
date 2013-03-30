@@ -1,0 +1,428 @@
+// CameraSnap.mel
+//
+// Version:  1.0
+// Creation Date:  March 28, 2013
+//
+// ------------------------------------------------------------
+//
+// Procedure Name:
+// CameraSnap( int $mode); 
+//
+// Description:
+// Clone an array of cameras to an single animated camera path
+//
+// The mode option allows you to pick between mode 1 for a
+// single frame step value.
+
+// Mode 2 is reserved for a future spline based animation curve 
+// mode with a custom frame step value.
+//
+// ------------------------------------------------------------
+//
+// Procedure Name:
+// openCamSnapHelp();
+//
+// Description:
+// Open the tool's help window
+//
+// ------------------------------------------------------------
+//
+// Author:
+// Andrew Hazelden
+//
+// Contact:
+// andrew@andrewhazelden.com
+// http://www.andrewhazelden.com
+//
+// About the Script:
+// CameraSnap.mel takes a list of selected cameras in your scene as an input and creates a
+// new camera with an animation path that moves through the position of each of the original 
+// input cameras.
+//
+// The script was created to use convert the dozens of still cameras imported from a
+// photogrammetry program like Autodesk 123D Catch into a single camera animation path.
+//
+// This script could also be used for converting a matrix style time-slice aka. "bullet-time" 
+// camera rig in your Maya scene into a single camera with a path animation that can be 
+// playedback in the viewport and controlled using maya's normal time controls. 
+//
+//
+//
+// CameraSnap.mel Script Installation:
+//
+// Windows MEL Script Install:
+//
+// To load the CameraSnap.mel script in Maya copy the script file to your user account's
+// Maya scripts folder.
+//
+// On Windows the script folder is located in the folder:
+//  My Documents\maya\<maya version number>\prefs\scripts
+//
+// In this case <maya version number> is a placeholder for your actual Maya release
+// number like "2013-x64". 
+//
+// In Maya add a new shelf button with the MEL commands:
+// source "CameraSnap.mel";
+// snapshotThis();
+//
+// ------------------------------------------------------------
+//
+// Mac OS X MEL Script Install:
+//
+// To load the CameraSnap.mel script in Maya copy the script file to your user account's
+// Maya scripts folder.
+//
+// On mac os X the folder is located in your preferences folder.
+//  ~/Library/Preferences/Autodesk/maya/<maya version number>/prefs/scripts
+//
+// In this case <maya version number> is a placeholder for your actual Maya release
+// number like "2013-x64".
+
+// You can open the hidden Library folder on Mac OS X by using the 
+// Finder > Go to Folder menu item. Paste in the value:
+// ~/Library/Preferences/Autodesk/maya/ and hit the "go" button.
+//
+// In Maya add a new shelf button with the MEL commands:
+// source "CameraSnap.mel";
+// snapshotThis(1);
+//
+// ------------------------------------------------------------
+//
+// Usage:
+// Select a group of cameras in the outliner or a viewport. Run the snapshotThis(1);
+// command to create a new animated camera that will move through the position
+// of each of the input cameras in the original camera 'array'.
+//
+// The output duration of the new camera rig animation is based upon the total number of
+// cameras in the original selection. By default the new camera animation path is set 
+// to use linear tangents.
+//
+// Note:
+// If you adjust the near clipping distance the for new camera, the motion trail handle
+// control knots might become visible in the masterCamera1 camera view. In this case you
+// can manually hide the motion trail before you play the camera animation back.
+//
+//
+// To Dos:
+//
+// -Check if the selection is a locator or a camera. If it is a locators use the default camera settings
+//
+// -Support input camera connections with history
+// use expressions for live vs manual update of camera path
+//
+// -Exclude motion path from mastercamera view using a draw override 
+// or use a near/far to hide the motion path cube knots
+//
+// -Parametric - use connection editor to link camera fov and settings for each frame - allows zoom and focus controls
+//  Zoom controls from each source camera
+//  dof focus controls from each sourcecamera
+//  checkbox - lock camera settings from first camera 
+//
+// Add image loading for the imageplanes
+// Add toggle image plane visibility
+//
+// show numbered frames for each motion path knot
+// setAttr "motionTrail1HandleShape.showFrames" 1;
+//
+//
+// Note: If you are working on a scene with comple geometry and slow viewport performance,
+// it would be possible to change the xform and keyframe to copy the camera position without
+// changing the current playhead frame.
+
+global proc CameraSnap(int $mode){
+
+  float $camCenterOfInterest = 5.0;
+  float $camLocatorScale = 2.0;
+  float $camFocalLength = 35.0;
+  float $camDepthOfField = 1.0;
+  float $camDOFdistance = 10;
+  float $camfStop = 5.6;
+  float $camFocusRegionScale = 1.0;
+  float $camShutterAngle = 144;
+  float $camFarClipPlane =  1000;
+  float $camHorizontalFilmAperture = 1.417;
+  float $camVerticalFilmAperture = 0.945;
+  float $camVerticalFilmOffset = 0;
+  float $camHorizontalFilmOffset = 0;
+  float $camOverscan = 1.0;
+  float $camFilmFitOffset = 0;
+  float $camLensSqueezeRatio = 1.0;
+  float $camMotionBlur = 1.0;
+  string $camFilmFit;
+
+  int $eachFrame=0;
+  float $master[16];
+
+
+  //Select active cameras
+  string $select[] = `ls -os -type transform`;
+
+
+  // ls options
+  // -showType (lists type of objects selected)
+  // -type transform (lists only transform nodes)
+  // -selection(-sl) 	(List selected objects)
+  // -orderedSelection(-os) (List objects in the selected order.)
+  //
+  // string $select[] = `ls -sl`;
+
+  //Check for selected cameras
+  if ( size( $select) > 1 ){
+
+    // Camera Center of Interest value from the input camera
+    //$camCenterOfInterest = getAttr($select[0]+".centerOfInterest")
+
+    // Focal length from the input camera
+    $camFocalLength = getAttr($select[0]+".focalLength");
+
+    // Anamorphic Lens Squeeze Ratio from the input camera
+    $camLensSqueezeRatio = getAttr($select[0]+".lensSqueezeRatio");
+
+    // Horizontal Film Aperture from the input camera
+    $camHorizontalFilmAperture = getAttr($select[0]+".horizontalFilmAperture");
+
+    // Horizontal Film Offset from the input camera
+    $camHorizontalFilmOffset = getAttr($select[0]+".horizontalFilmOffset");
+
+    // Vertical Film Aperture from the input camera
+    $camVerticalFilmAperture = getAttr($select[0]+".verticalFilmAperture");
+
+    // Vertical Film Offset from the input camera
+    $camVerticalFilmOffset = getAttr($select[0]+".verticalFilmOffset");
+
+    // Film Fit from the input camera
+    $camFilmFit = getAttr($select[0]+".filmFit");
+
+    // Overscan from the input camera
+    $camOverscan = getAttr($select[0]+".overscan");
+
+    // Motion Blur from the input camera
+    $camMotionBlur = getAttr($select[0]+".motionBlur");
+
+    // Shutter Angle from the input camera
+    $camShutterAngle = getAttr($select[0]+".shutterAngle");
+
+    // Far Clip Plane from the input camera
+    $camFarClipPlane = getAttr($select[0]+".farClipPlane");
+
+    // Check if DOF is enabled from the input camera
+    $camDepthOfField = getAttr($select[0]+".depthOfField");
+
+    // DOF distance from the input camera
+    $camDOFdistance = getAttr($select[0]+".focusDistance");
+
+    // F Stop value from the input camera
+    $camfStop = getAttr($select[0]+".fStop");
+
+    // DOF Focus Region Scale value from the input camera
+    $camFocusRegionScale = getAttr($select[0]+".focusRegionScale");
+
+    // Locator scale from input camera
+    $camLocatorScale = getAttr($select[0]+ ".locatorScale");
+
+
+
+    string $cameraName[] = `camera -n "masterCamera" -centerOfInterest ($camCenterOfInterest) -focalLength ($camFocalLength) -lensSqueezeRatio ($camLensSqueezeRatio) -cameraScale 1 -horizontalFilmAperture ($camHorizontalFilmAperture) -horizontalFilmOffset ($camHorizontalFilmOffset) -verticalFilmAperture ($camVerticalFilmAperture) -verticalFilmOffset ($camVerticalFilmOffset) -filmFit ($camFilmFit) -overscan ($camOverscan) -motionBlur ($camMotionBlur) -shutterAngle ($camShutterAngle) -nearClipPlane 2 -farClipPlane ($camFarClipPlane)-depthOfField ($camDepthOfField) -focusDistance ($camDOFdistance) -fStop ($camfStop) -orthographic 0 -orthographicWidth 30 -panZoomEnabled 0 -horizontalPan 0 -verticalPan 0 -zoom 1`;
+
+
+    string $cameraTransform = $cameraName[0];
+    string $cameraShape = $cameraName[1];
+
+    // Set the size of the onscreen camera locator icon using the data from the 1st input camera.
+    setAttr ($cameraShape + ".locatorScale") $camLocatorScale;
+
+    print "Camera snapping:\n";
+    print $select;
+    print "\n\n";
+    print "To the camera named:\n";
+    print  $cameraShape;
+
+    currentTime ($eachFrame);
+
+    // process each selected camera
+    for ( $fromObj in $select ){
+
+    /*
+      // Extract the animated camera data per frame
+      // This would allow zooms to be keyframed.
+      
+      // Locator scale from input camera
+      $camLocatorScale = getAttr($fromObj+ ".locatorScale");
+
+      // Focal length from the input camera
+      $camFocalLength = getAttr($fromObj+".focalLength");
+
+      // Check if DOF is enabled from the input camera
+      $camDepthOfField = getAttr($fromObj+".depthOfField");
+
+      // DOF distance from the input camera
+      $camDOFdistance = getAttr($fromObj+".focusDistance");
+
+      // F Stop value from the input camera
+      $camfStop = getAttr($fromObj+".fStop");
+
+      // DOF Focus Region Scale value from the input camera
+      $camFocusRegionScale = getAttr($fromObj+".focusRegionScale");
+
+      // Far Clip Plane from the input camera
+      $camFarClipPlane = getAttr($fromObj+".farClipPlane");
+
+      // Horizontal Film Aperture from the input camera
+      $camHorizontalFilmAperture = getAttr($fromObj+".horizontalFilmAperture");
+
+      // Vertical Film Aperture from the input camera
+      $camVerticalFilmAperture = getAttr($fromObj+".verticalFilmAperture");
+
+      // Horizontal Film Offset from the input camera
+      $camHorizontalFilmOffset = getAttr($fromObj+".horizontalFilmOffset");
+
+      // Vertical Film Offset from the input camera
+      $camVerticalFilmOffset = getAttr($fromObj+".verticalFilmOffset");
+
+      // Film Fit from the input camera
+      $camFilmFit = getAttr($fromObj+".filmFit");
+
+      // Anamortphic Lens Squeeze Ratio from the input camera
+      $camLensSqueezeRatio = getAttr($fromObj+".lensSqueezeRatio");
+
+      // Shutter Angle from the input camera
+      $camShutterAngle = getAttr($fromObj+".shutterAngle");
+
+    */
+
+      //Run this "if" using the first input camera's data.
+      if( $eachFrame == 0){
+        /*
+        // Set the size of the onscreen camera locator icon using the data from the 1st input camera.
+        setAttr ($cameraShape + ".locatorScale") $camLocatorScale;
+
+        // Set the focal length for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".focalLength") getAttr($fromObj+".focalLength");
+
+
+        // Set the DOF checkbox for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".depthOfField") getAttr($fromObj+".depthOfField");
+
+        // Set the DOF distance for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".focusDistance") getAttr($fromObj+".focusDistance");
+
+        // Set the F Stop value for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".fStop") getAttr($fromObj+".fStop");
+
+        // Set the DOF Focus Region Scale value for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".focusRegionScale") getAttr($fromObj+".focusRegionScale");
+
+        // Set the Far Clip Plane for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".farClipPlane") getAttr($fromObj+".farClipPlane");
+
+        // Set the Horizontal Film Aperture for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".horizontalFilmAperture") getAttr($fromObj+".horizontalFilmAperture");
+
+        // Set the Vertical Film Aperture for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".verticalFilmAperture") getAttr($fromObj+".verticalFilmAperture");
+
+        // Set the Horizontal Film Offset for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".horizontalFilmOffset") getAttr($fromObj+".horizontalFilmOffset");
+
+        // Set the Vertical Film Offset for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".verticalFilmOffset") getAttr($fromObj+".verticalFilmOffset");
+
+        // Set the Film Fit for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".filmFit") getAttr($fromObj+".filmFit");
+
+        // Set the Anamortphic Lens Squeeze Ratio for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".lensSqueezeRatio") getAttr($fromObj+".lensSqueezeRatio");
+
+        // Set the shutter angle for the new camera using the data from the 1st input camera
+        setAttr ($cameraShape + ".shutterAngle") getAttr($fromObj+".shutterAngle");
+      */
+
+      }
+
+      //Advance playhead by 1 frame
+      $eachFrame++;
+      currentTime ($eachFrame);
+
+
+      $theTime = `currentTime -query`;
+      print ("Current Frame: " + ($theTime) + "\n");
+      print($fromObj + ": \n");
+
+      $master = getAttr($fromObj+".matrix");
+
+      xform -ws -m $master[0] $master[1] $master[2] $master[3] $master[4] $master[5] $master[6] $master[7] $master[8] 
+                 $master[9] $master[10] $master[11] $master[12] $master[13] $master[14] $master[15] $cameraName[0];
+
+      // Keyframe the new camera position
+      setKeyframe -at translate -at rotate $cameraName[0];
+
+      //Clean the temp matrix
+      clear $master;
+    }
+
+    //Reset the camera scale to avoid rendering issues
+    setAttr ($cameraTransform+".scaleX") 1;
+    setAttr ($cameraTransform+".scaleY") 1;
+    setAttr ($cameraTransform+".scaleZ") 1;
+
+    // Look through the new camera
+    //lookThroughModelPanelClipped $cameraShape modelPanel4 1 10000;
+
+
+
+    playbackOptions -animationStartTime 1 -animationEndTime ($eachFrame) -minTime 1 -maxTime ($eachFrame);
+
+    //Set up the render settings frame range
+    $minTime = `playbackOptions -q -minTime`;
+    setAttr "defaultRenderGlobals.startFrame" $minTime;
+
+    int $maxTime = `playbackOptions -q -maxTime`;
+    setAttr "defaultRenderGlobals.endFrame" $maxTime;
+
+
+    // Debug render globals settings
+    //select defaultRenderGlobals;
+
+
+    //Hide the selected camera array
+    hide $select;
+
+    select -r $cameraName[0];
+
+    float $camStartFrame = `playbackOptions -query -min`;
+   
+    //Create a new motion trail for the masterCamera1 view with editable keyframe control handles.
+    string $motionTrailName[] = `snapshot -motionTrail 1 -name "masterCameraTrail" -increment 1 -startTime ($camStartFrame)  -endTime ($eachFrame)`;
+
+    //Show frame markings on 1st camera trail
+    string $cameraTrailname =  $motionTrailName[0];
+    setAttr ($cameraTrailname+".showFrames") 1;
+
+
+    //Select the new camera
+    select -r $cameraName[0];
+  
+    //Rewind the playhead to the 1st frame
+    currentTime 1;
+
+  }else{
+   // Skip running the script if there are no cameras in the selection
+   print("No Cameras Selected!\n");   }
+}
+
+
+//Show the tool help
+global proc openCamSnapHelp()
+{  string $url="http://www.andrewhazelden.com";
+  showHelp -a $url;
+}
+
+
+//make an motion snapshot of the selected object
+global proc snapshotThis()
+{
+  string $select[] = `ls -sl`;
+  int $objectCount = size($select);
+  snapshot -motionTrail 1  -increment 1 -startTime `playbackOptions -query -min` -endTime `playbackOptions -query -max`;
+}
+

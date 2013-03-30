@@ -1,0 +1,123 @@
+global proc shelf_CameraTools () {
+    global string $gBuffStr;
+    global string $gBuffStr0;
+    global string $gBuffStr1;
+
+
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 82
+        -height 54
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "CameraSnap" 
+        -align "center" 
+        -label "CameraSnap" 
+        -labelOffset 0
+        -font "tinyBoldLabelFont" 
+        -image "CameraSnap.xpm" 
+        -image1 "CameraSnap.xpm" 
+        -style "iconAndTextVertical" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "print(\"Camera Snap Tool\");\nsource \"CameraSnap.mel\";\nCameraSnap(1);\n" 
+        -sourceType "mel" 
+        -actionIsSubstitute 0
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 82
+        -height 54
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Show" 
+        -align "center" 
+        -label "Show" 
+        -labelOffset 0
+        -font "tinyBoldLabelFont" 
+        -image "commandButton.xpm" 
+        -image1 "commandButton.xpm" 
+        -style "iconAndTextVertical" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "print(\"Show Selection\");\nShowSelectedObjects;\n" 
+        -sourceType "mel" 
+        -actionIsSubstitute 0
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 82
+        -height 54
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Hide Selection" 
+        -align "center" 
+        -label "Hide" 
+        -labelOffset 0
+        -font "tinyBoldLabelFont" 
+        -image "commandButton.xpm" 
+        -image1 "commandButton.xpm" 
+        -style "iconAndTextVertical" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "print(\"Hide Selection\");\nHideSelectedObjects;" 
+        -sourceType "mel" 
+        -actionIsSubstitute 0
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 82
+        -height 54
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Look Through Selected" 
+        -align "center" 
+        -label "LookSelected" 
+        -labelOffset 0
+        -font "tinyBoldLabelFont" 
+        -image "commandButton.xpm" 
+        -image1 "commandButton.xpm" 
+        -style "iconAndTextVertical" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "print(\"Look Through the Selected Object\");\nlookThroughSelected 0 modelPanel4;" 
+        -sourceType "mel" 
+        -actionIsSubstitute 0
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 82
+        -height 54
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "View Perspective Camera" 
+        -align "center" 
+        -label "PerspView" 
+        -labelOffset 0
+        -font "tinyBoldLabelFont" 
+        -image "commandButton.xpm" 
+        -image1 "commandButton.xpm" 
+        -style "iconAndTextVertical" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "print(\"Look Through the Perspective View\");\n//lookThroughSelected \"persp\" modelPanel4;\nlookThru persp;\n" 
+        -sourceType "mel" 
+        -actionIsSubstitute 0
+        -commandRepeatable 1
+    ;
+
+} 
