@@ -155,12 +155,12 @@ global proc CameraSnap(int $mode){
 
 
   //Select active cameras
-  //Maya 2010
+  //Maya 2010-2011
   string $select[] = `ls -sl -type transform`;
 
-
-  //Maya 2011+
+  //Maya 2013
   //string $select[] = `ls -os -type transform`;
+
 
 
   // ls options
@@ -227,7 +227,7 @@ global proc CameraSnap(int $mode){
 
 
 
-    string $cameraName[] = `camera -n "masterCamera" -centerOfInterest ($camCenterOfInterest) -focalLength ($camFocalLength) -lensSqueezeRatio ($camLensSqueezeRatio) -cameraScale 1 -horizontalFilmAperture ($camHorizontalFilmAperture) -horizontalFilmOffset ($camHorizontalFilmOffset) -verticalFilmAperture ($camVerticalFilmAperture) -verticalFilmOffset ($camVerticalFilmOffset) -filmFit ($camFilmFit) -overscan ($camOverscan) -motionBlur ($camMotionBlur) -shutterAngle ($camShutterAngle) -nearClipPlane 2 -farClipPlane ($camFarClipPlane)-depthOfField ($camDepthOfField) -focusDistance ($camDOFdistance) -fStop ($camfStop) -orthographic 0 -orthographicWidth 30`;
+    string $cameraName[] = `camera -n "masterCamera" -centerOfInterest ($camCenterOfInterest) -focalLength ($camFocalLength) -lensSqueezeRatio ($camLensSqueezeRatio) -cameraScale 1 -horizontalFilmAperture ($camHorizontalFilmAperture) -horizontalFilmOffset ($camHorizontalFilmOffset) -verticalFilmAperture ($camVerticalFilmAperture) -verticalFilmOffset ($camVerticalFilmOffset) -filmFit ($camFilmFit) -overscan ($camOverscan) -motionBlur ($camMotionBlur) -shutterAngle ($camShutterAngle) -nearClipPlane 2 -farClipPlane ($camFarClipPlane)-depthOfField ($camDepthOfField) -focusDistance ($camDOFdistance) -fStop ($camfStop) -orthographic 0 -orthographicWidth 30 -panZoomEnabled 0 -horizontalPan 0 -verticalPan 0 -zoom 1`;
 
 
     string $cameraTransform = $cameraName[0];

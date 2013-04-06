@@ -155,7 +155,12 @@ global proc CameraSnap(int $mode){
 
 
   //Select active cameras
-  string $select[] = `ls -os -type transform`;
+  //Maya 2010-2011
+  string $select[] = `ls -sl -type transform`;
+
+  //Maya 2013
+  //string $select[] = `ls -os -type transform`;
+
 
 
   // ls options
