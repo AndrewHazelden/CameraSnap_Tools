@@ -73,7 +73,7 @@ The `CameraSnap.mel` script works with Maya 2010-2018 on Windows/Mac/Linux.
 ### Windows MEL Script Install: ###
 
 
-#### Step 1.####
+#### Step 1. ####
 
 To load the CameraSnap.mel script in Maya copy the MEL script file to your user account's Maya scripts folder.
 
@@ -84,14 +84,14 @@ On Windows the script folder is located in the folder:
 In this case `<maya version number>` is a placeholder for your actual Maya release number like "`2014-x64`". 
 
 
-#### Step 2.####
+#### Step 2. ####
 
  Copy the shelf tool to the Maya Shelves folder:
 
 `My Documents\maya\<maya version number>\prefs\shelves`
 
 
-#### Step 3.####
+#### Step 3. ####
 
 Copy the icons to the Maya Shelves folder:
 
@@ -104,7 +104,7 @@ Copy the icons to the Maya Shelves folder:
 To load `the CameraSnap.mel` script in Maya copy the MEL script file to your user account's Maya scripts folder.
 
 
-#### Step 1.####
+#### Step 1. ####
 
 On mac os X the folder is located in your preferences folder.
 
@@ -113,21 +113,21 @@ On mac os X the folder is located in your preferences folder.
 In this case <maya version number> is a placeholder for your actual Maya release number like "`2014-x64`".
 
 
-#### Step 2.####
+#### Step 2. ####
 
 You can open the hidden Library folder on Mac OS X by using the Finder > Go to Folder menu item. Paste in the value:
 
 `~/Library/Preferences/Autodesk/maya/` and hit the "go" button.
 
 
-#### Step 3.####
+#### Step 3. ####
 
 Copy the shelf tool to the Maya Shelves folder:
 
 `~/Library/Preferences/Autodesk/maya/<maya version number>/prefs/shelves`
 
 
-#### Step 4.####
+#### Step 4. ####
 
 Copy the icons to the Maya Shelves folder:
 
